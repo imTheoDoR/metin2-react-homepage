@@ -13,6 +13,7 @@ module.exports = {
             gold: "#e0b961",
             dark2: "#1c1725",
             red: colors.red,
+            green: colors.green,
         },
     },
     plugins: [],
