@@ -15,7 +15,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const offset = moment().tz(timeZone).utcOffset() / 60;
     const timestampInDesiredZone = new Date(currentTimestamp.setHours(currentTimestamp.getHours() + offset));
+
     const tenMinutesAgo = new Date(timestampInDesiredZone.getTime() - 10 * 60 * 1000);
+    const twnetyForHoursAgo = new Date(timestampInDesiredZone.getTime() - 24 * 60 * 60 * 1000);
 
     try {
         const playersOnline = await prisma.account.findMany({
@@ -26,9 +28,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
         });
 
-        const playersOnlineCounter = playersOnline.length;
+        const playersOnline24Hours = await prisma.account.findMany({
+            where: {
+                last_play: {
+                    gte: twnetyForHoursAgo,
+                },
+            },
+        });
 
-        res.status(200).json({ playersOnline: playersOnlineCounter });
+        const playersOnlineCounter = playersOnline.length;
+        const playersOnlineCounter24Hours = playersOnline24Hours.length;
+
+        res.status(200).json({
+            playersOnline: playersOnlineCounter,
+            playersOnline24Hours: playersOnlineCounter24Hours,
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Internal Server Error" });
