@@ -1,0 +1,416 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+// Cluster 1 - account
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  schemas  = ["account", "player"]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model account {
+  id                     Int      @id @default(autoincrement()) @db.UnsignedInt
+  login                  String   @unique(map: "login") @default("") @db.VarChar(16)
+  password               String
+  social_id              String   @default("") @db.VarChar(7)
+  email                  String   @unique @default("") @db.VarChar(100)
+  securitycode           String   @default("") @db.VarChar(192)
+  status                 String   @default("OK") @db.VarChar(8)
+  availDt                DateTime @default(now()) @db.DateTime(0)
+  create_time            DateTime @default(now()) @db.DateTime(0)
+  last_play              DateTime @default(now()) @db.DateTime(0)
+  gold_expire            DateTime @default(dbgenerated("'2025-01-01 22:00:00'")) @db.DateTime(0)
+  silver_expire          DateTime @default(dbgenerated("'2025-01-01 22:00:00'")) @db.DateTime(0)
+  safebox_expire         DateTime @default(dbgenerated("'2025-01-01 22:00:00'")) @db.DateTime(0)
+  autoloot_expire        DateTime @default(dbgenerated("'2025-01-01 22:00:00'")) @db.DateTime(0)
+  fish_mind_expire       DateTime @default(dbgenerated("'2025-01-01 22:00:00'")) @db.DateTime(0)
+  marriage_fast_expire   DateTime @default(dbgenerated("'2025-01-01 22:00:00'")) @db.DateTime(0)
+  money_drop_rate_expire DateTime @default(dbgenerated("'2025-01-01 22:00:00'")) @db.DateTime(0)
+  real_name              String?  @default("") @db.VarChar(16)
+  question1              String?  @db.VarChar(56)
+  answer1                String?  @db.VarChar(56)
+  question2              String?  @db.VarChar(56)
+  answer2                String?  @db.VarChar(56)
+  cash                   Int?     @default(0)
+  coins                  String?  @db.VarChar(50)
+  empire                 Int?
+  isAdmin                Boolean  @default(false)
+
+  @@index([social_id], map: "social_id")
+  @@schema("account")
+}
+
+model player {
+  id                    Int       @id @default(autoincrement()) @db.UnsignedInt
+  account_id            Int       @default(0) @db.UnsignedInt
+  name                  String    @default("NONAME") @db.VarChar(24)
+  pin                   String    @default("0000") @db.VarChar(4)
+  job                   Int       @default(0) @db.UnsignedTinyInt
+  voice                 Boolean   @default(false)
+  dir                   Int       @default(0) @db.TinyInt
+  x                     Int       @default(0)
+  y                     Int       @default(0)
+  z                     Int       @default(0)
+  map_index             Int       @default(0)
+  exit_x                Int       @default(0)
+  exit_y                Int       @default(0)
+  exit_map_index        Int       @default(0)
+  hp                    Int       @default(0)
+  mp                    Int       @default(0)
+  stamina               Int       @default(0) @db.SmallInt
+  random_hp             Int       @default(0) @db.SmallInt
+  random_sp             Int       @default(0) @db.SmallInt
+  playtime              Int       @default(0)
+  level                 Int       @default(1) @db.UnsignedTinyInt
+  level_step            Boolean   @default(false)
+  st                    Int       @default(0) @db.SmallInt
+  ht                    Int       @default(0) @db.SmallInt
+  dx                    Int       @default(0) @db.SmallInt
+  iq                    Int       @default(0) @db.SmallInt
+  exp                   Int       @default(0)
+  gold                  BigInt    @default(0)
+  stat_point            Int       @default(0) @db.SmallInt
+  skill_point           Int       @default(0) @db.SmallInt
+  quickslot             Bytes?    @db.TinyBlob
+  ip                    String?   @default("0.0.0.0") @db.VarChar(15)
+  part_main             Int       @default(0) @db.MediumInt
+  part_base             Int       @default(0) @db.TinyInt
+  part_hair             Int       @default(0) @db.MediumInt
+  part_sash             Int       @default(0) @db.UnsignedSmallInt
+  skill_group           Int       @default(0) @db.TinyInt
+  skill_level           Bytes?    @db.Blob
+  alignment             Int       @default(0)
+  sungma_str            Int?      @default(0) @db.SmallInt
+  sungma_hp             Int?      @default(0) @db.SmallInt
+  sungma_move           Int?      @default(0) @db.SmallInt
+  sungma_inmune         Int?      @default(0) @db.SmallInt
+  conqueror_level_step  Boolean?  @default(false)
+  last_play             DateTime  @default(now()) @db.DateTime(0)
+  change_name           Boolean   @default(false)
+  mobile                String?   @db.VarChar(24)
+  sub_skill_point       Int       @default(0) @db.SmallInt
+  stat_reset_count      Int       @default(0) @db.TinyInt
+  horse_hp              Int       @default(0) @db.SmallInt
+  horse_stamina         Int       @default(0) @db.SmallInt
+  horse_level           Int       @default(0) @db.UnsignedTinyInt
+  horse_hp_droptime     Int       @default(0) @db.UnsignedInt
+  horse_riding          Boolean   @default(false)
+  horse_skill_point     Int       @default(0) @db.SmallInt
+  fish_slots            Bytes?    @db.Blob
+  fish_use_count        DateTime? @db.DateTime(0) @ignore
+  premium               Int?      @default(0) @db.SmallInt
+  biologist_state       Int?      @default(0) @db.SmallInt
+  biologist_items_taken Int?      @default(0) @db.SmallInt
+  biologist_completed   Int?      @default(0) @db.SmallInt
+
+  @@index([account_id], map: "account_id_idx")
+  @@index([name], map: "name_idx")
+
+  @@schema("player")
+}
+
+model player_index {
+  id     Int @id @default(0) @db.UnsignedInt
+  pid1   Int @default(0) @db.UnsignedInt
+  pid2   Int @default(0) @db.UnsignedInt
+  pid3   Int @default(0) @db.UnsignedInt
+  pid4   Int @default(0) @db.UnsignedInt
+  pid5   Int @default(0) @db.UnsignedInt
+  empire Int @default(0) @db.UnsignedTinyInt
+
+  @@index([pid1], map: "pid1_key")
+  @@index([pid2], map: "pid2_key")
+  @@index([pid3], map: "pid3_key")
+  @@index([pid4], map: "pid4_key")
+  @@index([pid5], map: "pid5_key")
+
+  @@schema("player")
+}
+
+model affect {
+  dwPID       Int @default(0) @db.UnsignedInt
+  bType       Int @default(0) @db.UnsignedSmallInt
+  bApplyOn    Int @default(0) @db.UnsignedTinyInt
+  lApplyValue Int @default(0)
+  dwFlag      Int @default(0) @db.UnsignedInt
+  lDuration   Int @default(0)
+  lSPCost     Int @default(0)
+
+  @@id([dwPID, bType, bApplyOn, lApplyValue])
+
+  @@schema("player")
+}
+
+model guild {
+  id           Int    @id @default(autoincrement()) @db.UnsignedInt
+  name         String @default("") @db.VarChar(12)
+  sp           Int    @default(1000) @db.SmallInt
+  master       Int    @default(0) @db.UnsignedInt
+  level        Int?   @db.TinyInt
+  exp          Int?
+  skill_point  Int    @default(0) @db.TinyInt
+  skill        Bytes? @db.TinyBlob
+  win          Int    @default(0)
+  draw         Int    @default(0)
+  loss         Int    @default(0)
+  ladder_point Int    @default(0)
+  gold         Int    @default(0)
+
+  @@schema("player")
+}
+
+model guild_member {
+  pid        Int     @unique(map: "pid") @default(0) @db.UnsignedInt
+  guild_id   Int     @default(0) @db.UnsignedInt
+  grade      Int?    @db.TinyInt
+  is_general Boolean @default(false)
+  offer      Int?    @db.UnsignedInt
+
+  @@id([guild_id, pid])
+  @@schema("player")
+}
+
+model item {
+  id             Int         @id @default(autoincrement()) @db.UnsignedInt
+  owner_id       Int         @default(0) @db.UnsignedInt
+  window         item_window @default(INVENTORY)
+  pos            Int         @default(0) @db.UnsignedSmallInt
+  count          Int         @default(0) @db.UnsignedSmallInt
+  vnum           Int         @default(0) @db.UnsignedInt
+  refine_element Int         @default(0) @db.UnsignedInt
+  transmutation  Int         @default(0) @db.UnsignedInt
+  socket0        Int         @default(0) @db.UnsignedInt
+  socket1        Int         @default(0) @db.UnsignedInt
+  socket2        Int         @default(0) @db.UnsignedInt
+  socket3        Int         @default(0) @db.UnsignedInt
+  socket4        Int         @default(0) @db.UnsignedInt
+  socket5        Int         @default(0) @db.UnsignedInt
+  attrtype0      Int         @default(0) @db.TinyInt
+  apply_path3    Int         @default(0) @db.TinyInt
+  apply_value3   Int         @default(0) @db.SmallInt
+  apply_type3    Int         @default(0) @db.TinyInt
+  apply_path2    Int         @default(0) @db.TinyInt
+  apply_value2   Int         @default(0) @db.SmallInt
+  apply_type2    Int         @default(0) @db.TinyInt
+  apply_path1    Int         @default(0) @db.TinyInt
+  apply_value1   Int         @default(0) @db.SmallInt
+  apply_type1    Int         @default(0) @db.TinyInt
+  apply_path0    Int         @default(0) @db.TinyInt
+  apply_value0   Int         @default(0) @db.SmallInt
+  apply_type0    Int         @default(0) @db.TinyInt
+  attrvalue0     Int         @default(0) @db.SmallInt
+  attrtype1      Int         @default(0) @db.TinyInt
+  attrvalue1     Int         @default(0) @db.SmallInt
+  attrtype2      Int         @default(0) @db.TinyInt
+  attrvalue2     Int         @default(0) @db.SmallInt
+  attrtype3      Int         @default(0) @db.TinyInt
+  attrvalue3     Int         @default(0) @db.SmallInt
+  attrtype4      Int         @default(0) @db.TinyInt
+  attrvalue4     Int         @default(0) @db.SmallInt
+  attrtype5      Int         @default(0) @db.TinyInt
+  attrvalue5     Int         @default(0) @db.SmallInt
+  attrtype6      Int         @default(0) @db.TinyInt
+  attrvalue6     Int         @default(0) @db.SmallInt
+
+  @@index([vnum], map: "item_vnum_index")
+  @@index([owner_id], map: "owner_id_idx")
+  @@schema("player")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model item_award {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  pid        Int       @default(0) @db.UnsignedInt
+  login      String    @default("") @db.VarChar(16)
+  vnum       Int       @default(0) @db.UnsignedInt
+  count      Int       @default(0) @db.UnsignedInt
+  given_time DateTime  @default(now()) @db.DateTime(0)
+  taken_time DateTime? @db.DateTime(0)
+  item_id    Int?      @db.UnsignedInt
+  why        String?   @db.VarChar(128)
+  socket0    Int       @default(0) @db.UnsignedInt
+  socket1    Int       @default(0) @db.UnsignedInt
+  socket2    Int       @default(0) @db.UnsignedInt
+  mall       Boolean   @default(false)
+
+  @@index([given_time], map: "given_time_idx")
+  @@index([pid], map: "pid_idx")
+  @@index([taken_time], map: "taken_time_idx")
+  @@schema("player")
+}
+
+model item_proto {
+  vnum           Int     @id @default(0) @db.UnsignedInt
+  name           Bytes   @default(dbgenerated("Noname")) @db.VarBinary(24)
+  locale_name    Bytes   @default(dbgenerated("Noname")) @db.VarBinary(24)
+  type           Int     @default(0) @db.TinyInt
+  subtype        Int     @default(0) @db.TinyInt
+  weight         Int?    @default(0) @db.TinyInt
+  size           Int?    @default(0) @db.TinyInt
+  antiflag       Int?    @default(0) @db.UnsignedInt
+  flag           Int?    @default(0) @db.UnsignedInt
+  wearflag       Int?    @default(0) @db.UnsignedInt
+  immuneflag     String  @default("")
+  gold           BigInt? @default(0)
+  shop_buy_price Int     @default(0) @db.UnsignedInt
+  refined_vnum   Int     @default(0) @db.UnsignedInt
+  refine_set     Int     @default(0) @db.UnsignedSmallInt
+  refine_set2    Int     @default(0) @db.UnsignedSmallInt
+  magic_pct      Int     @default(0) @db.TinyInt
+  limittype0     Int?    @default(0) @db.TinyInt
+  limitvalue0    Int?    @default(0)
+  limittype1     Int?    @default(0) @db.TinyInt
+  limitvalue1    Int?    @default(0)
+  applytype0     Int?    @default(0) @db.TinyInt
+  applyvalue0    Int?    @default(0)
+  applytype1     Int?    @default(0) @db.TinyInt
+  applyvalue1    Int?    @default(0)
+  applytype2     Int?    @default(0) @db.TinyInt
+  applyvalue2    Int?    @default(0)
+  value0         Int?    @default(0)
+  value1         Int?    @default(0)
+  value2         Int?    @default(0)
+  value3         Int?    @default(0)
+  value4         Int?    @default(0)
+  value5         Int?    @default(0)
+  socket0        Int?    @default(-1) @db.TinyInt
+  socket1        Int?    @default(-1) @db.TinyInt
+  socket2        Int?    @default(-1) @db.TinyInt
+  socket3        Int?    @default(-1) @db.TinyInt
+  socket4        Int?    @default(-1) @db.TinyInt
+  socket5        Int?    @default(-1) @db.TinyInt
+  specular       Int     @default(0) @db.TinyInt
+  socket_pct     Int     @default(0) @db.TinyInt
+  addon_type     Int     @default(0) @db.SmallInt
+
+  @@schema("player")
+}
+
+model mob_proto {
+  vnum              Int            @id @default(0) @db.UnsignedInt
+  name              String         @default("Noname") @db.VarChar(24)
+  locale_name       Bytes          @default(dbgenerated("Noname")) @db.VarBinary(24)
+  rank              Int            @default(0) @db.UnsignedTinyInt
+  type              Int            @default(0) @db.UnsignedTinyInt
+  battle_type       Boolean        @default(false)
+  level             Int            @default(1) @db.UnsignedSmallInt
+  size              mob_proto_size @default(SMALL)
+  ai_flag           String?
+  mount_capacity    Int            @default(0) @db.UnsignedTinyInt
+  setRaceFlag       String         @default("")
+  setImmuneFlag     String         @default("")
+  empire            Int            @default(0) @db.UnsignedTinyInt
+  folder            String         @default("") @db.VarChar(100)
+  on_click          Int            @default(0) @db.UnsignedTinyInt
+  st                Int            @default(0) @db.UnsignedSmallInt
+  dx                Int            @default(0) @db.UnsignedSmallInt
+  ht                Int            @default(0) @db.UnsignedSmallInt
+  iq                Int            @default(0) @db.UnsignedSmallInt
+  damage_min        Int            @default(0) @db.UnsignedSmallInt
+  damage_max        Int            @default(0) @db.UnsignedSmallInt
+  max_hp            Int            @default(0) @db.UnsignedInt
+  regen_cycle       Int            @default(0) @db.UnsignedTinyInt
+  regen_percent     Int            @default(0) @db.UnsignedTinyInt
+  gold_min          Int            @default(0)
+  gold_max          Int            @default(0)
+  exp               Int            @default(0) @db.UnsignedInt
+  def               Int            @default(0) @db.UnsignedSmallInt
+  attack_speed      Int            @default(100) @db.UnsignedSmallInt
+  move_speed        Int            @default(100) @db.UnsignedSmallInt
+  aggressive_hp_pct Int            @default(0) @db.UnsignedTinyInt
+  aggressive_sight  Int            @default(0) @db.UnsignedSmallInt
+  attack_range      Int            @default(0) @db.UnsignedSmallInt
+  drop_item         Int            @default(0) @db.UnsignedInt
+  resurrection_vnum Int            @default(0) @db.UnsignedInt
+  enchant_curse     Int            @default(0) @db.UnsignedTinyInt
+  enchant_slow      Int            @default(0) @db.UnsignedTinyInt
+  enchant_poison    Int            @default(0) @db.UnsignedTinyInt
+  enchant_stun      Int            @default(0) @db.UnsignedTinyInt
+  enchant_critical  Int            @default(0) @db.UnsignedTinyInt
+  enchant_penetrate Int            @default(0) @db.UnsignedTinyInt
+  resist_sword      Int            @default(0) @db.TinyInt
+  resist_twohand    Int            @default(0) @db.TinyInt
+  resist_dagger     Int            @default(0) @db.TinyInt
+  resist_bell       Int            @default(0) @db.TinyInt
+  resist_fan        Int            @default(0) @db.TinyInt
+  resist_bow        Int            @default(0) @db.TinyInt
+  resist_fire       Int            @default(0) @db.TinyInt
+  resist_elect      Int            @default(0) @db.TinyInt
+  resist_magic      Int            @default(0) @db.TinyInt
+  resist_wind       Int            @default(0) @db.TinyInt
+  resist_poison     Int            @default(0) @db.TinyInt
+  dam_multiply      Float?         @db.Float
+  summon            Int?
+  drain_sp          Int?
+  mob_color         Int?           @db.UnsignedInt
+  polymorph_item    Int            @default(0) @db.UnsignedInt
+  skill_level0      Int?           @db.UnsignedTinyInt
+  skill_vnum0       Int?           @db.UnsignedInt
+  skill_level1      Int?           @db.UnsignedTinyInt
+  skill_vnum1       Int?           @db.UnsignedInt
+  skill_level2      Int?           @db.UnsignedTinyInt
+  skill_vnum2       Int?           @db.UnsignedInt
+  skill_level3      Int?           @db.UnsignedTinyInt
+  skill_vnum3       Int?           @db.UnsignedInt
+  skill_level4      Int?           @db.UnsignedTinyInt
+  skill_vnum4       Int?           @db.UnsignedInt
+  sp_berserk        Int            @default(0) @db.TinyInt
+  sp_stoneskin      Int            @default(0) @db.TinyInt
+  sp_godspeed       Int            @default(0) @db.TinyInt
+  sp_deathblow      Int            @default(0) @db.TinyInt
+  sp_revive         Int            @default(0) @db.TinyInt
+
+  @@schema("player")
+}
+
+model refine_proto {
+  id          Int @id @default(autoincrement())
+  vnum0       Int @default(0) @db.UnsignedInt
+  count0      Int @default(0) @db.SmallInt
+  vnum1       Int @default(0) @db.UnsignedInt
+  count1      Int @default(0) @db.SmallInt
+  vnum2       Int @default(0) @db.UnsignedInt
+  count2      Int @default(0) @db.SmallInt
+  vnum3       Int @default(0) @db.UnsignedInt
+  count3      Int @default(0) @db.SmallInt
+  vnum4       Int @default(0) @db.UnsignedInt
+  count4      Int @default(0) @db.SmallInt
+  cost        Int @default(0)
+  src_vnum    Int @default(0) @db.UnsignedInt
+  result_vnum Int @default(0) @db.UnsignedInt
+  prob        Int @default(100) @db.SmallInt
+
+  @@schema("player")
+}
+
+model safebox {
+  account_id Int    @id @default(0) @db.UnsignedInt
+  size       Int    @default(0) @db.UnsignedTinyInt
+  password   String @default("") @db.VarChar(6)
+  gold       Int    @default(0)
+
+  @@schema("player")
+}
+
+enum item_window {
+  INVENTORY
+  EQUIPMENT
+  SAFEBOX
+  MALL
+  DRAGON_SOUL_INVENTORY
+  ATTR67_ADD
+  SWITCHBOT
+  BELT_INVENTORY
+  GROUND
+  AURA_REFINE
+  BUFF_EQUIPMENT
+}
+
+enum mob_proto_size {
+  SMALL
+  MEDIUM
+  BIG
+}

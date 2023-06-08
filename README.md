@@ -1,0 +1,3 @@
+## Metin2 Next.JS App
+
+THIS APP IS NOT READY TO USE!
